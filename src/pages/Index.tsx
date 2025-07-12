@@ -25,17 +25,22 @@ const Index = () => {
   const handleLeadCreate = useCallback((leadData: { name: string; email: string; phone: string; source: string }) => {
     const newLead = addLead({
       ...leadData,
-      status: 'new' // Add the required status property
+      status: 'new'
     });
     setLeads(prev => [newLead, ...prev]);
     setGrowthPercentage(calculateGrowthPercentage([newLead, ...leads]));
+    
+    // 🤖 AUTO-TRIGGER WORKFLOW FOR NEW LEAD
+    import('@/services/workflowService').then(({ workflowService }) => {
+      workflowService.autoTriggerWorkflow(newLead.id);
+    });
     
     // Auto-navigate to dashboard after creating lead
     setActiveTab('dashboard');
     
     toast({
       title: "Lead Created Successfully",
-      description: `${leadData.name} has been added to your CRM system.`,
+      description: `${leadData.name} has been added and workflow triggered automatically.`,
     });
   }, [leads]);
 
